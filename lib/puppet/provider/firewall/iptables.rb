@@ -602,6 +602,10 @@ Puppet::Type.type(:firewall).provide :iptables, :parent => Puppet::Provider::Fir
   def delete_args
     # Split into arguments
     line = properties[:line].gsub(/^\-A /, '-D ').split(/\s(?=(?:[^"]|"[^"]*")*$)/).map{|v| v.gsub(/"/, '')}
+    # Work around long-standing bug in ip6tables-save http://bugzilla.netfilter.org/show_bug.cgi?id=1015
+    if (self.class.instance_variable_get(:@protocol) == "IPv6" and properties[:proto] == "all") then
+      line = line  << "-p" + properties[:proto]
+    end
     line.unshift("-t", properties[:table])
   end
 
